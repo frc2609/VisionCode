@@ -36,11 +36,15 @@ kernel = numpy.ones((5,5), numpy.uint8)
  
 # allow the camera to warmup
 time.sleep(0.1)
- 
+
+loops = 0
+timesum = 0 
+CPS = 0
 # capture frames from the camera
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 	# grab the raw NumPy array representing the image, then initialize the timestamp
 	# and occupied/unoccupied text
+	timestart = time.time()
 	image = frame.array
 
         # CV erode iterations 1 Border_constant
@@ -48,7 +52,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 
         # CV dilate iterations 2 Border_constant
 	image_dilation = cv2.dilate(image_erosion, kernel, iterations=2)
-
+	
         # HSV H:49-97 S: 179-255 V: 25-220
         lower_green = numpy.array([60,80,41])
         upper_green = numpy.array([110,140,220])
@@ -70,6 +74,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                 print ("Index error")
         # show the frame and other images
         cv2.drawContours(image, contours, -1, (0,255,0), 3)
+	cv2.putText(image, "CPS: " + str(CPS) + " Loops: " + str(loops), (10,10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 0), 1)
 	cv2.imshow("Frame", image)
 	#cv2.imshow("image_erosion", image_erosion)
 	#cv2.imshow("image_dilation", image_dilation)
@@ -81,5 +86,9 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 	# if the `q` key was pressed, break from the loop
 	if key == ord("q"):
 		break
+	deltatime = ((time.time()-timestart)*1000)
+	timesum += deltatime
+	loops += 1
+	CPS = timesum/loops
 
 cv2.destroyAllWindows()
