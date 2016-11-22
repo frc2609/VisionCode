@@ -62,9 +62,9 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         # show the frame and other images
         cv2.drawContours(image, contours, -1, (0,255,0), 3)
 	cv2.imshow("Frame", image)
-	cv2.imshow("image_erosion", image_erosion)
-	cv2.imshow("image_dilation", image_dilation)
-	cv2.imshow("image_hsv", image_hsv)
+	#cv2.imshow("image_erosion", image_erosion)
+	#cv2.imshow("image_dilation", image_dilation)
+	#cv2.imshow("image_hsv", image_hsv)
  
 	# clear the stream in preparation for the next frame
 	rawCapture.truncate(0)
