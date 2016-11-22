@@ -56,9 +56,18 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         image_hsv = cv2.inRange(hsv, lower_green, upper_green)
 
         # Find contours
-        ret,thresh = cv2.threshold(image_hsv,127,255,0)
-        im2, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+        ret,thresh = cv2.threshold(image_hsv.copy(),127,255,0)
+        im2, contours, hierarchy = cv2.findContours(thresh.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
+        # Find bounding box's
+        ret,thresh = cv2.threshold(image_hsv.copy(),127,255,0)
+        test1,contours,hierarchy = cv2.findContours(thresh.copy(), 1, 2)
+        try:
+                cnt = contours[0]
+                x,y,w,h = cv2.boundingRect(cnt)
+                cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
+        except IndexError:
+                print ("Index error")
         # show the frame and other images
         cv2.drawContours(image, contours, -1, (0,255,0), 3)
 	cv2.imshow("Frame", image)
