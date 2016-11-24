@@ -28,12 +28,22 @@ camera.hflip = False
 camera.resolution = (640, 480)
 camera.framerate = 60
 camera.awb_mode = 'off'
-camera.awb_gains = (1.2, 1.0)
-camera.exposure_mode = 'backlight'
+camera.awb_gains = (0.5, 0.5)
+camera.brightness = 50
+camera.exposure_mode = 'fireworks'
+camera.exposure_mode = 'off'
+#camera.color_effects = 'None'
+camera.contrast = 0
+camera.drc_strength = 'off'
+camera.exposure_compensation = 0
 camera.flash_mode = 'off'
 camera.image_effect = 'none'
-camera.iso = 800
-camera.meter_mode = 'backlit' #Retrieves or sets the metering mode of the camera.
+camera.iso = 400
+#camera.led = False
+camera.saturation = 0
+camera.sharpness = 0
+camera.video_denoise = False
+camera.meter_mode = 'spot' #Retrieves or sets the metering mode of the camera.
 camera.video_stabilization = False
 rawCapture = PiRGBArray(camera, size=(640, 480))
 
@@ -60,8 +70,8 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 	image_dilation = cv2.dilate(image_erosion, kernel, iterations=2)
 	
         # HSV H:49-97 S: 179-255 V: 25-220
-        lower_green = numpy.array([60,80,41])
-        upper_green = numpy.array([110,140,220])
+        lower_green = numpy.array([40,120,120])
+        upper_green = numpy.array([70,255,255])
         hsv = cv2.cvtColor(image_dilation, cv2.COLOR_BGR2HSV)
         image_hsv = cv2.inRange(hsv, lower_green, upper_green)
 
@@ -81,12 +91,13 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         except IndexError:
                 print ("Index error")
         # show the frame and other images
+	
         cv2.drawContours(image, contours, -1, (0,255,0), 3)
 	cv2.putText(image, "CPS: " + str(CPS) + " Loops: " + str(loops), (10,10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 0), 1)
 	cv2.imshow("Frame", image)
-	cv2.imshow("image_erosion", image_erosion)
-	cv2.imshow("image_dilation", image_dilation)
-	#cv2.imshow("image_hsv", image_hsv)
+	#cv2.imshow("image_erosion", image_erosion)
+	#cv2.imshow("image_dilation", image_dilation)
+	cv2.imshow("image_hsv", image_hsv)
  
 	# clear the stream in preparation for the next frame
 	rawCapture.truncate(0)
