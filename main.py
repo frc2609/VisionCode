@@ -4,6 +4,11 @@ from picamera import PiCamera
 import time
 import cv2
 import numpy
+from networktables import NetworkTable
+
+NetworkTable.setIPAddress("roborio-2609-frc.local")#Change the address to your own
+NetworkTable.setClientMode()
+NetworkTable.initialize()
 
 # NT publish number (fps)
 # //Resize to 320x240 Cubic
@@ -40,6 +45,7 @@ time.sleep(0.1)
 loops = 0
 timesum = 0 
 CPS = 0
+sd = NetworkTable.getTable("SmartDashboard")
 # capture frames from the camera
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 	# grab the raw NumPy array representing the image, then initialize the timestamp
@@ -70,14 +76,16 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                 cnt = contours[0]
                 x,y,w,h = cv2.boundingRect(cnt)
                 cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
+                sd.putNumber('X', x)
+                sd.putNumber('Y', y)
         except IndexError:
                 print ("Index error")
         # show the frame and other images
         cv2.drawContours(image, contours, -1, (0,255,0), 3)
 	cv2.putText(image, "CPS: " + str(CPS) + " Loops: " + str(loops), (10,10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 0), 1)
 	cv2.imshow("Frame", image)
-	#cv2.imshow("image_erosion", image_erosion)
-	#cv2.imshow("image_dilation", image_dilation)
+	cv2.imshow("image_erosion", image_erosion)
+	cv2.imshow("image_dilation", image_dilation)
 	#cv2.imshow("image_hsv", image_hsv)
  
 	# clear the stream in preparation for the next frame
@@ -90,5 +98,13 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 	timesum += deltatime
 	loops += 1
 	CPS = timesum/loops
+
+	
+        try:
+                print('robotTime:', sd.getNumber('robotTime'))
+        except KeyError:
+                print('robotTime: N/A')
+        sd.putNumber('piLoops', loops)
+
 
 cv2.destroyAllWindows()
