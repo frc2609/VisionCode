@@ -76,8 +76,8 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                 cnt = contours[0]
                 x,y,w,h = cv2.boundingRect(cnt)
                 cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
-                sd.putNumber('X', x)
-                sd.putNumber('Y', y)
+                sd.putNumber('centerX', (x+w/2))
+                sd.putNumber('centerY', (y+h/2))
         except IndexError:
                 print ("Index error")
         # show the frame and other images
