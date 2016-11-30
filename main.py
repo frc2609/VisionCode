@@ -6,9 +6,10 @@ import cv2
 import numpy
 from networktables import NetworkTable
 
-NetworkTable.setIPAddress("roborio-2609-frc.local")#Change the address to your own
-NetworkTable.setClientMode()
-NetworkTable.initialize()
+#NetworkTable.setIPAddress("roborio-2609-frc.local")#Change the address to your own
+#NetworkTable.setClientMode()
+#NetworkTable.initialize()
+sd = NetworkTable.getTable("RaspberryPi")
 
 # NT publish number (fps)
 # //Resize to 320x240 Cubic
@@ -55,9 +56,11 @@ time.sleep(0.1)
 loops = 0
 timesum = 0 
 CPS = 0
-sd = NetworkTable.getTable("SmartDashboard")
+
 # capture frames from the camera
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+        
+        
 	# grab the raw NumPy array representing the image, then initialize the timestamp
 	# and occupied/unoccupied text
 	timestart = time.time()
@@ -112,10 +115,16 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 
 	
         try:
-                print('robotTime:', sd.getNumber('robotTime'))
+                print('raspberryTime:', sd.getNumber('raspberryTime'))
+                print('H_L:', sd.getNumber('H_L'))
+                print('H_U:', sd.getNumber('H_U'))
+                print('S_L:', sd.getNumber('S_L'))
+                print('S_U:', sd.getNumber('S_U'))
+                print('V_L:', sd.getNumber('V_L'))
+                print('V_U:', sd.getNumber('V_U'))
         except KeyError:
-                print('robotTime: N/A')
-        sd.putNumber('piLoops', loops)
+                print('RaspberryPi Connect: N/A')
+        # sd.putNumber('piLoops', loops)
 
 
 cv2.destroyAllWindows()
