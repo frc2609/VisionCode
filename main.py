@@ -6,7 +6,7 @@ import cv2
 import numpy
 from networktables import NetworkTable
 
-NetworkTable.setIPAddress("")#Change the address to your own
+NetworkTable.setIPAddress("roborio-2609-frc.local")#Change the address to your own
 NetworkTable.setClientMode()
 NetworkTable.initialize()
 sd = NetworkTable.getTable("RaspberryPi")
