@@ -25,7 +25,7 @@ sd = NetworkTable.getTable("RaspberryPi")
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
 camera.vflip = False
-camera.hflip = False
+camera.hflip = True
 camera.resolution = (320, 240)
 camera.framerate = 60
 camera.awb_mode = 'off'
