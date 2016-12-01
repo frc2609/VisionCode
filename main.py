@@ -6,7 +6,7 @@ import cv2
 import numpy
 from networktables import NetworkTable
 
-NetworkTable.setIPAddress("10.26.9.12")#Change the address to your own
+NetworkTable.setIPAddress("")#Change the address to your own
 NetworkTable.setClientMode()
 NetworkTable.initialize()
 sd = NetworkTable.getTable("RaspberryPi")
@@ -26,7 +26,7 @@ sd = NetworkTable.getTable("RaspberryPi")
 camera = PiCamera()
 camera.vflip = False
 camera.hflip = False
-camera.resolution = (640, 480)
+camera.resolution = (320, 240)
 camera.framerate = 60
 camera.awb_mode = 'off'
 camera.awb_gains = (0.5, 0.5)
@@ -46,7 +46,7 @@ camera.sharpness = 0
 camera.video_denoise = False
 camera.meter_mode = 'spot' #Retrieves or sets the metering mode of the camera.
 camera.video_stabilization = False
-rawCapture = PiRGBArray(camera, size=(640, 480))
+rawCapture = PiRGBArray(camera, size=(320, 240))
 
 kernel = numpy.ones((5,5), numpy.uint8)
  
@@ -56,8 +56,8 @@ time.sleep(0.1)
 loops = 0
 timesum = 0 
 CPS = 0
-sd.putNumber('H_L',40)
-sd.putNumber('H_U',70)
+sd.putNumber('H_L',30)
+sd.putNumber('H_U',90)
 sd.putNumber('S_L',120)
 sd.putNumber('S_U',255)
 sd.putNumber('V_L',120)
@@ -96,28 +96,28 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     image_hsv = cv2.inRange(hsv, lower_green, upper_green)
 
     # Find contours
-    ret,thresh = cv2.threshold(image_hsv.copy(),127,255,0)
-    im2, contours, hierarchy = cv2.findContours(thresh.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    ret,thresh = cv2.threshold(image_hsv,127,200,cv2.THRESH_BINARY)
+    im2, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
     # Find bounding box's
-    ret,thresh = cv2.threshold(image_hsv.copy(),127,255,0)
-    test1,contours,hierarchy = cv2.findContours(thresh.copy(), 1, 2)
+    #ret,thresh = cv2.threshold(image_hsv,90,255,cv2.THRESH_BINARY)
+    #test1,contours,hierarchy = cv2.findContours(thresh, 1, 2)
     try:
         cnt = contours[0]
         x,y,w,h = cv2.boundingRect(cnt)
-        cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
+        cv2.rectangle(image,(x,y),(x+w,y+h),(0,0,255),3)
         sd.putNumber('centerX', (x+w/2))
         sd.putNumber('centerY', (y+h/2))
     except IndexError:
         print ("Index error")
     # show the frame and other images
     
-    #cv2.drawContours(image, contours, -1, (0,255,0), 3)
+    #cv2.drawContours(image, contours, -1, (0,0,255), 3)
     #cv2.putText(image, "CPS: " + str(CPS) + " Loops: " + str(loops), (10,10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 0), 1)
-    #cv2.imshow("Frame", image)
+    cv2.imshow("Frame", image)
     #cv2.imshow("image_erosion", image_erosion)
     #cv2.imshow("image_dilation", image_dilation)
-    #cv2.imshow("image_hsv", image_hsv)
+    cv2.imshow("image_hsv", image_hsv)
 
     # clear the stream in preparation for the next frame
     rawCapture.truncate(0)
@@ -125,10 +125,10 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     # if the `q` key was pressed, break from the loop
     if key == ord("q"):
             break
-    deltatime = ((time.time()-timestart)*1000)
-    timesum += deltatime
-    loops += 1
-    CPS = timesum/loops
+    #deltatime = ((time.time()-timestart)*1000)
+    #timesum += deltatime
+    #loops += 1
+    #CPS = timesum/loops
 
     
 ##    try:
