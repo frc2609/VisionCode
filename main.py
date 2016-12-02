@@ -75,12 +75,6 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     timestart = time.time()
     image = frame.array
 
-    # CV erode iterations 1 Border_constant
-    image_erosion = cv2.erode(image, None, iterations=2)
-
-    # CV dilate iterations 2 Border_constant
-    image_dilation = cv2.dilate(image, None, iterations=2)
-    
     # HSV H:49-97 S: 179-255 V: 25-220
     try:
         H_L = sd.getNumber('H_L')
@@ -96,6 +90,15 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     upper_green = numpy.array([H_U,S_U,V_U])
     hsv = cv2.cvtColor(image_dilation, cv2.COLOR_BGR2HSV)
     image_hsv = cv2.inRange(hsv, lower_green, upper_green)
+
+
+    # CV erode iterations 1 Border_constant
+    image_erosion = cv2.erode(image, None, iterations=2)
+
+    # CV dilate iterations 2 Border_constant
+    image_dilation = cv2.dilate(image, None, iterations=2)
+    
+
 
     # Find contours
     ret,thresh = cv2.threshold(image_hsv,0,255,cv2.THRESH_BINARY)
