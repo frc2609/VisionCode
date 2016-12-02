@@ -125,9 +125,9 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         cv2.line(image,pts[i-1],pts[i],(0,0,255),thickness)
         
         #cv2.rectangle(image,(x,y),(x+w,y+h),(0,0,255),3)
-        #sd.putNumber('centerX', (x+w/2))
-        #sd.putNumber('centerY', (y+h/2))
-        sd.putString('center', str(center))   
+        sd.putNumber('centerX', int(M["m10"] / M["m00"]))
+        sd.putNumber('centerY', int(M["m01"] / M["m00"]))
+        #sd.putString('center', str(center))   
 
     # show the frame and other images
     
