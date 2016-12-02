@@ -1,4 +1,5 @@
 # import the necessary packages
+from collections import deque
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 import time
@@ -10,6 +11,8 @@ NetworkTable.setIPAddress("roborio-2609-frc.local")#Change the address to your o
 NetworkTable.setClientMode()
 NetworkTable.initialize()
 sd = NetworkTable.getTable("RaspberryPi")
+memoryPts = 64
+pts = deque(maxlen=memoryPts) #Number of points of memory
 
 # NT publish number (fps)
 # //Resize to 320x240 Cubic
@@ -29,7 +32,7 @@ camera.hflip = True
 camera.resolution = (320, 240)
 camera.framerate = 60
 camera.awb_mode = 'off'
-camera.awb_gains = (0.5, 0.5)
+camera.awb_gains = (0.2, 0.2)
 camera.brightness = 50
 camera.exposure_mode = 'fireworks'
 camera.exposure_mode = 'off'
@@ -73,13 +76,12 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     image = frame.array
 
     # CV erode iterations 1 Border_constant
-    #image_erosion = cv2.erode(image, kernel, iterations=1)
+    image_erosion = cv2.erode(image, None, iterations=2)
 
     # CV dilate iterations 2 Border_constant
-    image_dilation = cv2.dilate(image, kernel, iterations=2)
+    image_dilation = cv2.dilate(image, None, iterations=2)
     
     # HSV H:49-97 S: 179-255 V: 25-220
-    H_L = sd.getNumber('H_L')
     try:
         H_L = sd.getNumber('H_L')
         H_U = sd.getNumber('H_U')
@@ -97,24 +99,40 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 
     # Find contours
     ret,thresh = cv2.threshold(image_hsv,0,255,cv2.THRESH_BINARY)
-    im2, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    cnts = cv2.findContours(thresh.copy(),cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[-2]
+    center = None
 
-    # Find bounding box's
-    #ret,thresh = cv2.threshold(image_hsv,90,255,cv2.THRESH_BINARY)
-    #test1,contours,hierarchy = cv2.findContours(thresh, 1, 2)
-    try:
-        cnt = contours[0]
-        x,y,w,h = cv2.boundingRect(cnt)
-        cv2.rectangle(image,(x,y),(x+w,y+h),(0,0,255),3)
-        sd.putNumber('centerX', (x+w/2))
-        sd.putNumber('centerY', (y+h/2))
-    except IndexError:
-        print ("Index error")
+    # only proceed if at least one contour was found
+    if len(cnts) > 0:
+        # Find bounding box's
+        #x,y,w,h = cv2.boundingRect(cnts)
+        c = max(cnts, key=cv2.contourArea)
+        ((x,y),radius) = cv2.minEnclosingCircle(c)
+        M = cv2.moments(c)
+        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+        # only if radius meets a min size
+        if radius > 10:
+            cv2.circle(image,(int(x),int(y)),int(radius),(0,255,255),2)
+            cv2.circle(image,center,5,(0,255,255),-1)
+    #update points in queue
+    pts.appendleft(center)
+    for i in xrange(1, len(pts)):
+        if pts[i-1] is None or pts [i] is None:
+            continue
+        #otherwise compute thickness of line and connect it
+        thickness = int((numpy.sqrt(memoryPts) / float(i+1)*2.5))
+        cv2.line(image,pts[i-1],pts[i],(0,0,255),thickness)
+        
+        #cv2.rectangle(image,(x,y),(x+w,y+h),(0,0,255),3)
+        #sd.putNumber('centerX', (x+w/2))
+        #sd.putNumber('centerY', (y+h/2))
+        #sd.putNumber('center', (center))      
+
     # show the frame and other images
     
     #cv2.drawContours(image, contours, -1, (0,0,255), 3)
     #cv2.putText(image, "CPS: " + str(CPS) + " Loops: " + str(loops), (10,10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 0), 1)
-    #cv2.imshow("Frame", image)
+    cv2.imshow("Frame", image)
     #cv2.imshow("image_erosion", image_erosion)
     #cv2.imshow("thresh", thresh)
     #cv2.imshow("image_hsv", image_hsv)
