@@ -88,22 +88,20 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     
     lower_green = numpy.array([H_L,S_L,V_L])
     upper_green = numpy.array([H_U,S_U,V_U])
-    hsv = cv2.cvtColor(image_dilation, cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     image_hsv = cv2.inRange(hsv, lower_green, upper_green)
 
-
     # CV erode iterations 1 Border_constant
-    image_erosion = cv2.erode(image, None, iterations=2)
+    image_erosion = cv2.erode(image_hsv, None, iterations=2)
 
     # CV dilate iterations 2 Border_constant
-    image_dilation = cv2.dilate(image, None, iterations=2)
-    
+    image_dilation = cv2.dilate(image_erosion, None, iterations=2)
 
 
     # Find contours
-    ret,thresh = cv2.threshold(image_hsv,0,255,cv2.THRESH_BINARY)
-    cnts = cv2.findContours(thresh.copy(),cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[-2]
-    center = None
+    #ret,thresh = cv2.threshold(image_dilation,0,255,cv2.THRESH_BINARY)
+    cnts = cv2.findContours(image_dilation.copy(),cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[-2]
+    center = (0,0)
 
     # only proceed if at least one contour was found
     if len(cnts) > 0:
@@ -129,7 +127,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         #cv2.rectangle(image,(x,y),(x+w,y+h),(0,0,255),3)
         #sd.putNumber('centerX', (x+w/2))
         #sd.putNumber('centerY', (y+h/2))
-        #sd.putNumber('center', (center))      
+        sd.putString('center', str(center))   
 
     # show the frame and other images
     
