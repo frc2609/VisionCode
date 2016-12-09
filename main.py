@@ -138,7 +138,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     
     #cv2.drawContours(image, contours, -1, (0,0,255), 3)
     #cv2.putText(image, "CPS: " + str(CPS) + " Loops: " + str(loops), (10,10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 0), 1)
-    cv2.imshow("Frame", image)
+    #cv2.imshow("Frame", image)
     #cv2.imshow("image_erosion", image_erosion)
     #cv2.imshow("thresh", thresh)
     #cv2.imshow("image_hsv", image_hsv)
