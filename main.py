@@ -6,6 +6,7 @@ import time
 import cv2
 import numpy
 from networktables import NetworkTable
+import math
 
 NetworkTable.setIPAddress("roborio-2609-frc.local")#Change the address to your own
 NetworkTable.setClientMode()
@@ -114,7 +115,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         # only if radius meets a min size
         if radius > 10:
             cv2.circle(image,(int(x),int(y)),int(radius),(0,255,255),2)
-            cv2.circle(image,center,5,(0,255,255),-1)
+            cv2.circle(int(M["m10"] / M["m00"])(image,center,5,(0,255,255),-1)
     #update points in queue
     pts.appendleft(center)
     for i in xrange(1, len(pts)):
@@ -123,9 +124,13 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         #otherwise compute thickness of line and connect it
         thickness = int((numpy.sqrt(memoryPts) / float(i+1)*2.5))
         cv2.line(image,pts[i-1],pts[i],(0,0,255),thickness)
-        
+        centerX = int(M["m10"] / M["m00"])
+        angleToTarget = math.atan((centerX-160)/320.9103533214) #  angleToTarget returns angle to target in rads.
+        #                                                    320.9103533214 is our focal length in pixels
+        #                                                    found out by width/(2*tan(FOV/2)) where FOV is in degrees
         #cv2.rectangle(image,(x,y),(x+w,y+h),(0,0,255),3)
-        sd.putNumber('centerX', int(M["m10"] / M["m00"]))
+        sd.putNumber('centerX', centerX)
+        sd.putNumber('angleToTarget', angleToTarget)
         sd.putNumber('centerY', int(M["m01"] / M["m00"]))
         #sd.putString('center', str(center))   
 
