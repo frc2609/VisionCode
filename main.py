@@ -115,7 +115,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         # only if radius meets a min size
         if radius > 10:
             cv2.circle(image,(int(x),int(y)),int(radius),(0,255,255),2)
-            cv2.circle(int(M["m10"] / M["m00"])(image,center,5,(0,255,255),-1)
+            cv2.circle(int(M["m10"] / M["m00"])(image,center,5,(0,255,255),-1))
     #update points in queue
     pts.appendleft(center)
     for i in xrange(1, len(pts)):
