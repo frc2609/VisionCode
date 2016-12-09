@@ -29,7 +29,7 @@ pts = deque(maxlen=memoryPts) #Number of points of memory
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
 camera.vflip = False
-camera.hflip = True
+camera.hflip = False
 camera.resolution = (320, 240)
 camera.framerate = 60
 camera.awb_mode = 'off'
