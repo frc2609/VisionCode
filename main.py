@@ -115,7 +115,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         # only if radius meets a min size
         if radius > 10:
             cv2.circle(image,(int(x),int(y)),int(radius),(0,255,255),2)
-            cv2.circle(int(M["m10"] / M["m00"])(image,center,5,(0,255,255),-1))
+            cv2.circle(image,center,5,(0,255,255),-1)
     #update points in queue
     pts.appendleft(center)
     for i in xrange(1, len(pts)):
@@ -138,7 +138,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     
     #cv2.drawContours(image, contours, -1, (0,0,255), 3)
     #cv2.putText(image, "CPS: " + str(CPS) + " Loops: " + str(loops), (10,10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 0), 1)
-    #cv2.imshow("Frame", image)
+    cv2.imshow("Frame", image)
     #cv2.imshow("image_erosion", image_erosion)
     #cv2.imshow("thresh", thresh)
     #cv2.imshow("image_hsv", image_hsv)
