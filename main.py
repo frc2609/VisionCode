@@ -30,12 +30,12 @@ pts = deque(maxlen=memoryPts) #Number of points of memory
 camera = PiCamera()
 camera.vflip = False
 camera.hflip = False
-camera.resolution = (320, 240)
+camera.resolution = (640, 480)
 camera.framerate = 60
 camera.awb_mode = 'off'
 camera.awb_gains = (0.2, 0.2)
 camera.brightness = 50
-camera.exposure_mode = 'fireworks'
+camera.exposure_mode = 'sports'
 camera.exposure_mode = 'off'
 #camera.color_effects = 'None'
 camera.contrast = 0
@@ -50,13 +50,13 @@ camera.sharpness = 0
 camera.video_denoise = False
 camera.meter_mode = 'spot' #Retrieves or sets the metering mode of the camera.
 camera.video_stabilization = False
-rawCapture = PiRGBArray(camera, size=(320, 240))
-
+rawCapture = PiRGBArray(camera, size=(640, 480))
+print(camera.exposure_speed)
 kernel = numpy.ones((5,5), numpy.uint8)
  
 # allow the camera to warmup
 time.sleep(0.1)
-
+frameNum = 0
 loops = 0
 timesum = 0 
 CPS = 0
@@ -70,7 +70,7 @@ sd.putNumber('V_U',255)
 # capture frames from the camera
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         
-        
+    frameNum=frameNum+1
     # grab the raw NumPy array representing the image, then initialize the timestamp
     # and occupied/unoccupied text
     timestart = time.time()
@@ -117,7 +117,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             cv2.circle(image,(int(x),int(y)),int(radius),(0,255,255),2)
             cv2.circle(image,center,5,(0,255,255),-1)
     #update points in queue
-    pts.appendleft(center)
+        pts.appendleft(center)
     for i in xrange(1, len(pts)):
         if pts[i-1] is None or pts [i] is None:
             continue
@@ -132,6 +132,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         sd.putNumber('centerX', centerX)
         sd.putNumber('angleToTarget', angleToTarget)
         sd.putNumber('centerY', int(M["m01"] / M["m00"]))
+        sd.putNumber('frameNum', frameNum)
         #sd.putString('center', str(center))   
 
     # show the frame and other images
