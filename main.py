@@ -9,7 +9,7 @@ from networktables import NetworkTable
 import math
 
 NetworkTable.setIPAddress("roborio-2609-frc.local")#Change the address to your own
-NetworkTable.setClientMode()64true
+NetworkTable.setClientMode()
 NetworkTable.initialize()
 sd = NetworkTable.getTable("RaspberryPi")
 memoryPts = 64
