@@ -9,7 +9,7 @@ from networktables import NetworkTable
 import math
 
 NetworkTable.setIPAddress("roborio-2609-frc.local")#Change the address to your own
-NetworkTable.setClientMode()
+NetworkTable.setClientMode()64true
 NetworkTable.initialize()
 sd = NetworkTable.getTable("RaspberryPi")
 memoryPts = 64
@@ -30,10 +30,10 @@ pts = deque(maxlen=memoryPts) #Number of points of memory
 camera = PiCamera()
 camera.vflip = False
 camera.hflip = False
-camera.resolution = (640, 480)
+camera.resolution = (320, 240)
 camera.framerate = 60
 camera.awb_mode = 'off'
-camera.awb_gains = (0.2, 0.2)
+camera.awb_gains = (.2, .2)
 camera.brightness = 50
 camera.exposure_mode = 'sports'
 camera.exposure_mode = 'off'
@@ -50,13 +50,13 @@ camera.sharpness = 0
 camera.video_denoise = False
 camera.meter_mode = 'spot' #Retrieves or sets the metering mode of the camera.
 camera.video_stabilization = False
-rawCapture = PiRGBArray(camera, size=(640, 480))
-print(camera.exposure_speed)
+rawCapture = PiRGBArray(camera, size=(320, 240))
+camera.shutter_speed = 10000 #Random value chosen
 kernel = numpy.ones((5,5), numpy.uint8)
  
 # allow the camera to warmup
 time.sleep(0.1)
-frameNum = 0
+#frameNum = 0 # TODO: find out how to determine unique frames
 loops = 0
 timesum = 0 
 CPS = 0
@@ -66,11 +66,12 @@ sd.putNumber('S_L',120)
 sd.putNumber('S_U',255)
 sd.putNumber('V_L',120)
 sd.putNumber('V_U',255)
+vision = False
 
 # capture frames from the camera
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         
-    frameNum=frameNum+1
+    #frameNum=frameNum+1
     # grab the raw NumPy array representing the image, then initialize the timestamp
     # and occupied/unoccupied text
     timestart = time.time()
@@ -84,6 +85,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         S_U = sd.getNumber('S_U')
         V_L = sd.getNumber('V_L')
         V_U = sd.getNumber('V_U')
+        vision = sd.getBoolean("vision", False)
     except KeyError:
         print('RaspberryPi Connect: N/A 1')
     
@@ -93,56 +95,70 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     image_hsv = cv2.inRange(hsv, lower_green, upper_green)
 
     # CV erode iterations 1 Border_constant
-    image_erosion = cv2.erode(image_hsv, None, iterations=2)
+    #image_erosion = cv2.erode(image_hsv, None, iterations=2)
 
     # CV dilate iterations 2 Border_constant
-    image_dilation = cv2.dilate(image_erosion, None, iterations=2)
+    #image_dilation = cv2.dilate(image_erosion, None, iterations=2)
 
 
     # Find contours
     #ret,thresh = cv2.threshold(image_dilation,0,255,cv2.THRESH_BINARY)
-    cnts = cv2.findContours(image_dilation.copy(),cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[-2]
-    center = (0,0)
+    cnts = cv2.findContours(image_hsv.copy(),cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[-2]
+    #center = (0,0)
 
     # only proceed if at least one contour was found
     if len(cnts) > 0:
         # Find bounding box's
-        #x,y,w,h = cv2.boundingRect(cnts)
+        #x,y,w,h = cv2.boundingRect(cnts)int(
         c = max(cnts, key=cv2.contourArea)
         ((x,y),radius) = cv2.minEnclosingCircle(c)
         M = cv2.moments(c)
-        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+        if (M["m00"]!=0):
+            center = (int(M["m10"] /(M["m00"])), int(M["m01"] / (M["m00"])))
+        else:
+            center = (int(M["m10"] /1), int(M["m01"] / 1))
         # only if radius meets a min size
-        if radius > 10:
-            cv2.circle(image,(int(x),int(y)),int(radius),(0,255,255),2)
-            cv2.circle(image,center,5,(0,255,255),-1)
-    #update points in queue
-        pts.appendleft(center)
-    for i in xrange(1, len(pts)):
-        if pts[i-1] is None or pts [i] is None:
-            continue
-        #otherwise compute thickness of line and connect it
-        thickness = int((numpy.sqrt(memoryPts) / float(i+1)*2.5))
-        cv2.line(image,pts[i-1],pts[i],(0,0,255),thickness)
-        centerX = int(M["m10"] / M["m00"])
-        angleToTarget = math.atan((centerX-160)/320.9103533214) #  angleToTarget returns angle to target in rads.
+        if radius > 25: 
+            if (vision):
+                cv2.circle(image,(int(x),int(y)),int(radius),(0,255,255),2)
+                cv2.circle(image,center,5,(0,255,255),-1)
+            centerX = center[0]
+            centerY = center[1]
+            angleToTarget = math.atan((centerX-160)/317.5) #(320/(2*math.tan(53/2))))*.5 #  angleToTarget returns angle to target in rads.
         #                                                    320.9103533214 is our focal length in pixels
         #                                                    found out by width/(2*tan(FOV/2)) where FOV is in degrees
         #cv2.rectangle(image,(x,y),(x+w,y+h),(0,0,255),3)
-        sd.putNumber('centerX', centerX)
-        sd.putNumber('angleToTarget', angleToTarget)
-        sd.putNumber('centerY', int(M["m01"] / M["m00"]))
-        sd.putNumber('frameNum', frameNum)
-        #sd.putString('center', str(center))   
-
+        else: # if no target is found
+            centerX = -1 # return -1  for centerX (check if it is -1 in robot code)
+            centerY = -1 # return -1  for centerY (check if it is -1 in robot code)
+            angleToTarget = 0 # return 0 degrees as angle to target (assuming we are on target we just can't see it)
+        #sd.putNumber('frameNum', frameNum)
+        #sd.putString('center', str(center))  
+        #update points in queue
+        #pts.appendleft(center) 
+    else: # if no target is found
+        centerX = -1 # return -1  for centerX (check if it is -1 in robot code)
+        centerY = -1 # return -1  for centerY (check if it is -1 in robot code)
+        angleToTarget = 0 # return 0 degrees as angle to target (assuming we are on target we just can't see it)
     # show the frame and other images
+    #for i in xrange(1, len(pts)):
+    #    if pts[i-1] is None or pts [i] is None:
+    #        continue
+        #otherwise compute thickness of line and connect it
+    #    thickness = int((numpy.sqrt(memoryPts) / float(i+1)*2.5))
+    #    cv2.line(image,pts[i-1],pts[i],(0,0,255),thickness)
+    sd.putNumber('centerX', centerX)
+    sd.putNumber('angleToTarget', angleToTarget*(180/math.pi)) # put out angle to target in degrees
+    sd.putNumber('centerY', centerY)
     
-    #cv2.drawContours(image, contours, -1, (0,0,255), 3)
-    #cv2.putText(image, "CPS: " + str(CPS) + " Loops: " + str(loops), (10,10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 0), 1)
-    #cv2.imshow("Frame", image)
-    #cv2.imshow("image_erosion", image_erosion)
-    #cv2.imshow("thresh", thresh)
-    #cv2.imshow("image_hsv", image_hsv)
+    
+    if (vision):
+        #cv2.drawContours(image, contours, -1, (0,0,255), 3)
+        #cv2.putText(image, "CPS: " + str(CPS) + " Loops: " + str(loops), (10,10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 0), 1)
+        cv2.imshow("Frame", image)
+        #cv2.imshow("image_erosion", image_erosion)
+        #cv2.imshow("thresh", thresh)
+        #cv2.imshow("image_hsv", image_hsv)
 
     # clear the stream in preparation for the next frame
     rawCapture.truncate(0)
@@ -152,7 +168,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             break
     #deltatime = ((time.time()-timestart)*1000)
     #timesum += deltatime
-    #loops += 1
+    loops += 1
     #CPS = timesum/loops
 
     
