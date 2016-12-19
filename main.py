@@ -1,5 +1,5 @@
 # import the necessary packages
-from imutils.video import VideoStream
+import VideoStream
 import time, cv2, numpy, imutils, math, argparse
 from networktables import NetworkTable
 from utils import *
