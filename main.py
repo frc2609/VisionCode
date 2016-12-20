@@ -1,15 +1,10 @@
 # import the necessary packages
-import VideoStream
+from pivideostream import PiVideoStream
 import time, cv2, numpy, imutils, math, argparse
 from networktables import NetworkTable
 from utils import *
 import utils
 
-# construct the argument parse and parse the arguments
-ap = argparse.ArgumentParser()
-ap.add_argument("-p", "--picamera", type=int, default=-1,
-	help="whether or not the Raspberry Pi camera should be used")
-args = vars(ap.parse_args())
 kernel = numpy.ones((5,5), numpy.uint8)
 #frameNum = 0 # TODO: find out how to determine unique frames
 loops = 0
@@ -18,7 +13,7 @@ centerX = 0
 centerY = 0
 angleToTarget = 0
 utils.hsvWrite(30,90,120,255,120,255) #Write Networktable values
-cap = VideoStream(usePiCamera=args["picamera"] > 0).start() # initialize the video stream and allow the cammera sensor to warmup
+cap = PiVideoStream().start()
 time.sleep(2.0)
 while True:
     image = cap.read() #Capture frame
