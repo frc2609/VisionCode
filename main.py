@@ -4,6 +4,7 @@ import time, cv2, numpy, imutils, math, argparse
 from networktables import NetworkTable
 from utils import *
 import utils
+from cv2 import countNonZero
 
 kernel = numpy.ones((5,5), numpy.uint8)
 #frameNum = 0 # TODO: find out how to determine unique frames
@@ -15,13 +16,22 @@ angleToTarget = 0
 utils.hsvWrite(30,90,120,255,120,255) #Write Networktable values
 cap = PiVideoStream().start()
 time.sleep(2.0)
+target = -1
 while True:
     image = cap.read() #Capture frame
+    imageCopy = image
+##    if loops == 0:
+##        oldimageCopy = imageCopy
     image = imutils.resize(image, width=320) #resize - needed to allow rest of toolpath to work
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) #Convert from BGR to HSV
     (lower_green,upper_green,display) = utils.hsvRead() #Get lower and Upper HSV values from the Networktable to use
     image_hsv = cv2.inRange(hsv, lower_green, upper_green) #Filter based on lower and upper HSV limits
     cnts = cv2.findContours(image_hsv.copy(),cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[-2]# Find contours
+##    difference = cv2.subtract(imageCopy, oldimageCopy)    
+##    result = not numpy.any(difference)
+##    if result is True:
+##        print "Pictures are the same"
+##    else:
     if len(cnts) > 0:# only proceed if at least one contour was found
         c = max(cnts, key=cv2.contourArea)
         ((x,y),radius) = cv2.minEnclosingCircle(c)
@@ -46,9 +56,11 @@ while True:
     if display != 0: #Draw display if turned on 
         cv2.imshow("Frame", image) #Display a screen with outputs
         key = cv2.waitKey(1) & 0xFF #Wait for keypress if there is a display
+##    oldimageCopy=imageCopy
     utils.targetWrite(target,centerX,centerY,angleToTarget,loops)
     if key == ord("q"):# if the `q` key was pressed, break from the loop
             break
     loops += 1
+    
 cv2.destroyAllWindows()
 cap.stop()
