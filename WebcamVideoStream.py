@@ -7,6 +7,16 @@ class WebcamVideoStream:
         # initialize the video camera stream and read the first frame
         # from the stream
         self.stream = cv2.VideoCapture(src)
+        #self.format = XX
+        #self.mode = XX
+        self.brightness = 50
+        self.contrast = 0
+        self.saturation = 0
+        self.gain = 0.2
+        self.exposure = 0
+        
+
+        
         (self.grabbed, self.frame) = self.stream.read()
 
         # initialize the variable used to indicate if the thread should
