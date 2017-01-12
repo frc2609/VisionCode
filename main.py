@@ -20,7 +20,9 @@ key = 0
 centerX = 0
 centerY = 0
 angleToTarget = 0
-utils.hsvWrite(30,90,120,255,120,255) #Write Networktable values
+#utils.hsvWrite(30,90,120,255,120,255) #Write Networktable values Green
+utils.hsvWrite(80,120,80,120,190,255) #Write Networktable values Blue
+#utils.hsvWrite(130,120,80,200,190,255) #Write Networktable values Red
 if (args["picamera"] > 0):
     cap = PiVideoStream().start()
 else:
