@@ -60,13 +60,13 @@ while True:
     detectArray=[]
     if len(cnts) > 0:# only proceed if at least one contour was found
         for c in cnts:
-            if cv2.contourArea(c) < 1000:
+            if cv2.contourArea(c) < 50:
                 continue
             # compute the center of the contour, then detect the name of the
             # shape using only the contour
             M = cv2.moments(c)
                                
-            shape = sd.detect(c)
+            shape = "Target" #sd.detect(c)
             if (M["m00"]!=0): #Catch a div/0 error!
                 cX = int(M["m10"] / M["m00"])
                 cY = int(M["m01"] / M["m00"])
@@ -75,20 +75,33 @@ while True:
                 cY = int(M["m01"] / 1)
             
             if shape == "Target":
-                peri = cv2.arcLength(c, True)
-                approx = cv2.approxPolyDP(c, 0.1 * peri, True)
-                (x, y, w, h) = cv2.boundingRect(approx)
+                #peri = cv2.arcLength(c, True)
+                #approx = cv2.approxPolyDP(c, 0.1 * peri, True)
+                (x, y, w, h) = cv2.boundingRect(c)
+                ar = float(w) / float(h)
+                shape = "Target" if ar >= 0.2 and ar <= 0.7 else "rejected"
+                if shape =="rejected":
+                    print("ar rejected")
+                    continue
+                elif cv2.contourArea(c)/(w*h)<.5:
+                    print("contour area rejected")
+                    continue
+                elif cY < 80 or cY > 160:
+                    print("target not right height ")+str(cY)
+                    continue
                 if r1x1 == -1:
                     r1x1=x
                     r1x2=x+w
+                    print("target 1")
                 elif r2x1 == -1:
                     r2x1=x
                     r2x2=x+w
+                    print("target 2")
                 else:
                     # Run away!
                     print("run away")
                 centerX = (min(r1x1,r2x1)+max(r1x2,r2x2))/2
-                centerY = 100
+                centerY = cY
 ##                detectArray.append(c)
 ##                print(detectArray)
                 cv2.drawContours(image, [c], -1, (255, 0, 0), 2)
@@ -104,11 +117,11 @@ while True:
                 center = (centerX,centerY)
                 cv2.circle(image,(int(centerX),int(centerY)),int(abs(cX-centerX)),(0,255,255),2)
                 cv2.circle(image,center,5,(0,255,255),-1)
-            cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(image, shape+" "+str(cv2.contourArea(c)), (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
     utils.targetWrite(target,centerX,centerY,angleToTarget,loops)
     if display != 0: #Draw display if turned on 
-#        cv2.imshow("Frame", image) #Display a screen with outputs
-#        cv2.imshow("HSV,Blur,Thresh", thresh) #Display a screen with outputs        
+        cv2.imshow("Frame", image) #Display a screen with outputs
+        cv2.imshow("HSV,Blur,Thresh", thresh) #Display a screen with outputs        
         key = cv2.waitKey(1) & 0xFF #Wait for keypress if there is a display
     if key == ord("q"):# if the `q` key was pressed, break from the loop
         break

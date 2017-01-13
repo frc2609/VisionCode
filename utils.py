@@ -20,7 +20,7 @@ def hsvRead(): #Read HSV filter values from the Networktable
     S_U = sd.getNumber('S_U') #S upper
     V_L = sd.getNumber('V_L') #V lower
     V_U = sd.getNumber('V_U') #V upper
-    display = sd.getNumber("display",1) #Default to Off(0) for display of window
+    display = sd.getNumber("display",0) #Default to Off(0) for display of window
     lower_green = numpy.array([H_L,S_L,V_L]) #Set array of lower HSV limits
     upper_green = numpy.array([H_U,S_U,V_U]) #Set array of upper HSV limits
     return (lower_green,upper_green,display)

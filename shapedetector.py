@@ -9,7 +9,7 @@ class ShapeDetector:
 		# initialize the shape name and approximate the contour
 		shape = "unidentified"
 		peri = cv2.arcLength(c, True)
-		approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+		approx = cv2.approxPolyDP(c, 0.1 * peri, True)
 
 		# if the shape is a triangle, it will have 3 vertices
 		if len(approx) == 3:
@@ -25,7 +25,7 @@ class ShapeDetector:
 
 			# a square will have an aspect ratio that is approximately
 			# equal to one, otherwise, the shape is a rectangle
-			shape = "Target" if ar >= 0.3 and ar <= 0.5 else "rejected "+str(ar)
+			shape = "Target" if ar >= 0.2 and ar <= 0.7 else "rejected "+str(ar)
 
 		# if the shape is a pentagon, it will have 5 vertices
 		elif len(approx) == 5:
