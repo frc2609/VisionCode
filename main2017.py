@@ -32,7 +32,10 @@ time.sleep(2.0)
 target = -1
 centerX = 0
 centerY = 0
-
+r1x1 = -1
+r1x2 = -1
+r2x1 = -1
+r2x2 = -1
 while True:
     image = cap.read() #Capture frame
     imageCopy = image
@@ -72,28 +75,47 @@ while True:
                 cY = int(M["m01"] / 1)
             
             if shape == "Target":
-                detectArray.append(c)
-                print(detectArray)
+                peri = cv2.arcLength(c, True)
+                approx = cv2.approxPolyDP(c, 0.1 * peri, True)
+                (x, y, w, h) = cv2.boundingRect(approx)
+                if r1x1 == -1:
+                    r1x1=x
+                    r1x2=x+w
+                elif r2x1 == -1:
+                    r2x1=x
+                    r2x2=x+w
+                else:
+                    # Run away!
+                    print("run away")
+                centerX = (min(r1x1,r2x1)+max(r1x2,r2x2))/2
+                centerY = 100
+##                detectArray.append(c)
+##                print(detectArray)
                 cv2.drawContours(image, [c], -1, (255, 0, 0), 2)
-                centerX = (centerX + cX)/2
-                centerY = (centerY + cY)/2
+##                centerX = (centerX + cX)/2
+##                centerY = (centerY + cY)/2
                 detectCenter=detectCenter+1
             else:
                 cv2.drawContours(image, [c], -1, (0, 255, 0), 2)
             # multiply the contour (x, y)-coordinates by the resize ratio,
             # then draw the contours and the name of the shape on the image
-            if detectCenter == 1:
+            if detectCenter == 2:
+                angleToTarget = math.atan((centerX-160)/317.5)*(180/math.pi) #angleToTarget returns angle to target in degrees
                 center = (centerX,centerY)
                 cv2.circle(image,(int(centerX),int(centerY)),int(abs(cX-centerX)),(0,255,255),2)
                 cv2.circle(image,center,5,(0,255,255),-1)
             cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+    utils.targetWrite(target,centerX,centerY,angleToTarget,loops)
     if display != 0: #Draw display if turned on 
-        cv2.imshow("Frame", image) #Display a screen with outputs
-        cv2.imshow("HSV,Blur,Thresh", thresh) #Display a screen with outputs        
+#        cv2.imshow("Frame", image) #Display a screen with outputs
+#        cv2.imshow("HSV,Blur,Thresh", thresh) #Display a screen with outputs        
         key = cv2.waitKey(1) & 0xFF #Wait for keypress if there is a display
     if key == ord("q"):# if the `q` key was pressed, break from the loop
         break
-        
+    r1x1 = -1
+    r1x2 = -1
+    r2x1 = -1
+    r2x2 = -1    
 
 ##        if radius > 25: #Only if radius meets a min size
 ##            centerX = center[0]
