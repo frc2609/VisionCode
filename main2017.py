@@ -21,6 +21,7 @@ key = 0
 centerX = 0
 centerY = 0
 angleToTarget = 0
+display = 0
 utils.hsvWrite(30,90,120,255,120,255) #Write Networktable values Green
 #utils.hsvWrite(80,120,80,120,190,255) #Write Networktable values Blue
 #utils.hsvWrite(130,120,80,200,190,255) #Write Networktable values Red
@@ -29,6 +30,7 @@ if (args["picamera"] > 0):
 else:
     cap = WebcamVideoStream().start()
 time.sleep(2.0)
+distanceTarget = -1
 target = -1
 centerX = 0
 centerY = 0
@@ -79,31 +81,44 @@ while True:
                 #approx = cv2.approxPolyDP(c, 0.1 * peri, True)
                 (x, y, w, h) = cv2.boundingRect(c)
                 ar = float(w) / float(h)
-                shape = "Target" if ar >= 0.2 and ar <= 0.7 else "rejected"
+                shape = "Target" if ar >= 0.2 and ar <= 1.5 else "rejected" #ratio of length to heigh, how square is the object
                 if shape =="rejected":
-                    print("ar rejected")
+                    print("ar rejected"+str(ar))
                     continue
-                elif cv2.contourArea(c)/(w*h)<.5:
+                elif cv2.contourArea(c)/(w*h)<.5:#solidity
                     print("contour area rejected")
                     continue
-                elif cY < 80 or cY > 160:
+                elif h < 20 or h > 400:
                     print("target not right height ")+str(cY)
                     continue
                 if r1x1 == -1:
-                    r1x1=x
-                    r1x2=x+w
-                    print("target 1")
+                    r1x1 = x
+                    r1x2 = x+w
+                    r1y1 = y
+                    r1y2 = y+h
+                    h1=h#save for calc distance later
+                    print("target 1 "+str(h),cv2.contourArea(c))
                 elif r2x1 == -1:
-                    r2x1=x
-                    r2x2=x+w
-                    print("target 2")
+                    r2x1 = x
+                    r2x2 = x+w
+                    r2y1 = y
+                    r2y2 = y+h
+                    h2=h#save for calc distance later
+                    print("target 2 "+str(h),cv2.contourArea(c))
+                elif r3x1 == -1:
+                    r3x1 = x
+                    r3x2 = x+w
+                    r3y1 = y
+                    r3y2 = y+h
+                    print("target 3 "+str(h),cv2.contourArea(c))
                 else:
                     # Run away!
                     print("run away")
                 centerX = (min(r1x1,r2x1)+max(r1x2,r2x2))/2
                 centerY = cY
-##                detectArray.append(c)
-##                print(detectArray)
+                cont = [x,w,y,h]
+                detectArray.append(cont)
+                print(detectArray)
                 cv2.drawContours(image, [c], -1, (255, 0, 0), 2)
 ##                centerX = (centerX + cX)/2
 ##                centerY = (centerY + cY)/2
@@ -112,14 +127,23 @@ while True:
                 cv2.drawContours(image, [c], -1, (0, 255, 0), 2)
             # multiply the contour (x, y)-coordinates by the resize ratio,
             # then draw the contours and the name of the shape on the image
+            for i in range(len(detectArray)):
+                j in range(len(detectArray)+(i+1)):
+                    if(abs(detectArray[i][0]-detectArray[j][0])<=10):
+                        print("number "+ str(i) + " and " + str(j) " are matched")
             if detectCenter == 2:
+                distanceTarget = 24.80375 + 286.0474*2.718281828459**(-0.07273127*h1)#use h1 to calc distance to target
+                print("distance to target "+str(distanceTarget))
                 angleToTarget = math.atan((centerX-160)/317.5)*(180/math.pi) #angleToTarget returns angle to target in degrees
                 center = (centerX,centerY)
                 cv2.circle(image,(int(centerX),int(centerY)),int(abs(cX-centerX)),(0,255,255),2)
                 cv2.circle(image,center,5,(0,255,255),-1)
-            cv2.putText(image, shape+" "+str(cv2.contourArea(c)), (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-    utils.targetWrite(target,centerX,centerY,angleToTarget,loops)
-    if display != 0: #Draw display if turned on 
+                target = 1
+            else:
+                target = -1
+            cv2.putText(image, shape+" "+str(shape), (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+        utils.targetWrite(target,centerX,centerY,angleToTarget,loops,distanceTarget)
+    if display == 1: #Draw display if turned on 
         cv2.imshow("Frame", image) #Display a screen with outputs
         cv2.imshow("HSV,Blur,Thresh", thresh) #Display a screen with outputs        
         key = cv2.waitKey(1) & 0xFF #Wait for keypress if there is a display
@@ -127,9 +151,17 @@ while True:
         break
     r1x1 = -1
     r1x2 = -1
+    r1y1 = -1
+    r1y2 = -1
     r2x1 = -1
-    r2x2 = -1    
-
+    r2x2 = -1
+    r2y1 = -1
+    r2y2 = -1
+    r3x1 = -1
+    r3x2 = -1
+    r3y1 = -1
+    r3y2 = -1
+    cv2.imwrite("test.jpg", image)
 ##        if radius > 25: #Only if radius meets a min size
 ##            centerX = center[0]
 ##            centerY = center[1]

@@ -66,8 +66,7 @@ while True:
         target = -1 # return -1  for target
     # show the frame and other images, output values to networktable
     if display != 0: #Draw display if turned on 
-        cv2.imshow("Frame", image) #Display a screen with outputs
-        key = cv2.waitKey(1) & 0xFF #Wait for keypress if there is a display
+        cv2.imshow("Frame", image) #Display a screen with outputs        key = cv2.waitKey(1) & 0xFF #Wait for keypress if there is a display
 ##    oldimageCopy=imageCopy
     utils.targetWrite(target,centerX,centerY,angleToTarget,loops)
     if key == ord("q"):# if the `q` key was pressed, break from the loop

@@ -25,9 +25,10 @@ def hsvRead(): #Read HSV filter values from the Networktable
     upper_green = numpy.array([H_U,S_U,V_U]) #Set array of upper HSV limits
     return (lower_green,upper_green,display)
 
-def targetWrite(target,centerX,centerY,angleToTarget,loops):#Read traget values from the Networktable
+def targetWrite(target,centerX,centerY,angleToTarget,loops, distanceToTarget):#Read traget values from the Networktable
     sd.putNumber('target', target) #Put out target 1 if found, -1 if not found
     sd.putNumber('centerX', centerX) #Put out centerX in pixels
     sd.putNumber('centerY', centerY) #Put out centerY in pixels
     sd.putNumber('angleToTarget', angleToTarget) #Put out angle to target in degrees
+    sd.putNumber('distanceToTarget', distanceToTarget)
     sd.putNumber('piLoops', loops)
