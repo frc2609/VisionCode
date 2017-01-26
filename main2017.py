@@ -88,8 +88,8 @@ while True:
                 elif cv2.contourArea(c)/(w*h)<.5:#solidity
                     print("contour area rejected")
                     continue
-                elif h < 20 or h > 400:
-                    print("target not right height ")+str(cY)
+                elif cY < 160:
+                    print("target not at right height ")+str(cY)
                     continue
                 if r1x1 == -1:
                     r1x1 = x
@@ -105,12 +105,6 @@ while True:
                     r2y2 = y+h
                     h2=h#save for calc distance later
                     print("target 2 "+str(h),cv2.contourArea(c))
-                elif r3x1 == -1:
-                    r3x1 = x
-                    r3x2 = x+w
-                    r3y1 = y
-                    r3y2 = y+h
-                    print("target 3 "+str(h),cv2.contourArea(c))
                 else:
                     # Run away!
                     print("run away")
@@ -127,14 +121,15 @@ while True:
                 cv2.drawContours(image, [c], -1, (0, 255, 0), 2)
             # multiply the contour (x, y)-coordinates by the resize ratio,
             # then draw the contours and the name of the shape on the image
-            for i in range(len(detectArray)):
-                j in range(len(detectArray)+(i+1)):
-                    if(abs(detectArray[i][0]-detectArray[j][0])<=10):
-                        print("number "+ str(i) + " and " + str(j) " are matched")
+        for i in range(len(detectArray)):
+            for j in range((i+1),len(detectArray)):
+                if(abs(detectArray[i][0]-detectArray[j][0])<=10):
+                    print("number "+ str(i) + " and " + str(j) + " are matched")
             if detectCenter == 2:
                 distanceTarget = 24.80375 + 286.0474*2.718281828459**(-0.07273127*h1)#use h1 to calc distance to target
                 print("distance to target "+str(distanceTarget))
                 angleToTarget = math.atan((centerX-160)/317.5)*(180/math.pi) #angleToTarget returns angle to target in degrees
+                print("angle to target "+str(angleToTarget))
                 center = (centerX,centerY)
                 cv2.circle(image,(int(centerX),int(centerY)),int(abs(cX-centerX)),(0,255,255),2)
                 cv2.circle(image,center,5,(0,255,255),-1)
@@ -157,10 +152,6 @@ while True:
     r2x2 = -1
     r2y1 = -1
     r2y2 = -1
-    r3x1 = -1
-    r3x2 = -1
-    r3y1 = -1
-    r3y2 = -1
     cv2.imwrite("test.jpg", image)
 ##        if radius > 25: #Only if radius meets a min size
 ##            centerX = center[0]

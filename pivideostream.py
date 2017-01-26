@@ -10,8 +10,9 @@ class PiVideoStream:
 		self.camera = PiCamera()
 		self.camera.resolution = resolution
 		self.camera.framerate = framerate
-		self.camera.vflip = True
-		self.camera.hflip = True
+		self.camera.vflip = False
+		self.camera.hflip = False
+		self.camera.rotation = 0
 		self.camera.awb_mode = 'off'
 		self.camera.awb_gains = (.2, .2)
 		self.camera.brightness = 50
