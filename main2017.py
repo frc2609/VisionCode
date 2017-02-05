@@ -2,11 +2,10 @@
 from pivideostream import PiVideoStream
 from WebcamVideoStream import WebcamVideoStream
 import time, cv2, numpy, imutils, math, argparse
-from networktables import NetworkTable
 from shapedetector import ShapeDetector
 from utils import *
 import utils
-from cv2 import countNonZero
+#from cv2 import countNonZero
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -44,15 +43,15 @@ while True:
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) #Convert from BGR to HSV
     (lower_green,upper_green,display) = utils.hsvRead() #Get lower and Upper HSV values from the Networktable to use
     image_hsv = cv2.inRange(hsv, lower_green, upper_green) #Filter based on lower and upper HSV limits
+    blue_hsv = cv2.inRange(hsv,[80,120,80],[120,190,255])
+    # subtract Blue from image_hsv to eliminate non green light from the path?
+    image_hsv = image_hsv - blue_hsv
 
-    # convert the resized image to grayscale, blur it slightly,
-    # and threshold it
-    #gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
+    # blur it slightly and threshold it
     blurred = cv2.GaussianBlur(image_hsv, (5, 5), 0)
     thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY)[1]
 
-    # find contours in the thresholded image and initialize the
-    # shape detector
+    # find contours in the thresholded image and initialize the shape detector
     cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = cnts[0] if imutils.is_cv2() else cnts[1]
     sd = ShapeDetector()
