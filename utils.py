@@ -3,6 +3,7 @@ from networktables import NetworkTable
 NetworkTable.setIPAddress("roborio-2609-frc.local")#Change the address to your own
 NetworkTable.setClientMode()
 NetworkTable.initialize()
+NetworkTable.setTeam(2609)
 sd = NetworkTable.getTable("RaspberryPi")
 
 def hsvWrite(H_L,H_U,S_L,S_U,V_L,V_U): #Write HSV values to the Networktable
