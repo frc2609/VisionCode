@@ -55,7 +55,7 @@ while True:
     #gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(image_hsv, (5, 5), 0)
     thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY)[1]
-
+	(contourAreaMin,squareRatioMin,squareRationMax,solidityMin,targetHeightMin) = utils.filterRead()
     # find contours in the thresholded image and initialize the
     # shape detector
     cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
