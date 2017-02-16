@@ -139,8 +139,7 @@ while True:
                 target = 1
             else:
                 target = -1
-            cv2.p
-            utText(image, shape+" "+str(shape), (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(image, shape+" "+str(shape), (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
         utils.targetWrite(target,centerX,centerY,angleToTarget,loops,distanceTarget)
     if display == 1: #Draw display if turned on 
         cv2.imshow("Frame", image) #Display a screen with outputs
@@ -157,27 +156,7 @@ while True:
     r2y1 = -1
     r2y2 = -1
     cv2.imwrite("test.jpg", image)
-##        if radius > 25: #Only if radius meets a min size
-##            centerX = center[0]
-##            centerY = center[1]
-##            angleToTarget = math.atan((centerX-160)/317.5)*(180/math.pi) #angleToTarget returns angle to target in degrees
-##            target = 1
-##            if display != 0: #Draw bounding circle and center dot if display turned on
-##                cv2.circle(image,(int(x),int(y)),int(radius),(0,255,255),2)
-##                cv2.circle(image,center,5,(0,255,255),-1)
-##        else: # if no target is large enough
-##            target = -1 # return -1  for target
-##    else: # if no contours are found
-##        target = -1 # return -1  for target
-##    # show the frame and other images, output values to networktable
-##    if display != 0: #Draw display if turned on 
-##        cv2.imshow("Frame", image) #Display a screen with outputs
-##        key = cv2.waitKey(1) & 0xFF #Wait for keypress if there is a display
-####    oldimageCopy=imageCopy
-##    utils.targetWrite(target,centerX,centerY,angleToTarget,loops)
-##    if key == ord("q"):# if the `q` key was pressed, break from the loop
-##            break
-##    loops += 1
+
     
 cv2.destroyAllWindows()
 cap.stop()
