@@ -33,11 +33,11 @@ def targetWrite(target,centerX,centerY,angleToTarget,loops, distanceToTarget):#R
     sd.putNumber('distanceToTarget', distanceToTarget)
     sd.putNumber('piLoops', loops)
     
-def filterRead(contourAreaMin,squareRatioMin,squareRationMax,solidityMin,targetHeightMin):
-    sd.getNumber('contourAreaMin', 0)
-    sd.getNumber('squareRatioMin', 0)
-    sd.getNumber('squareRationMax', 0)
-    sd.getNumber('solidityMin', 0)
-    sd.getNumber('targetHeightMin', 0)  
+def filterRead():
+    contourAreaMin = sd.getNumber('contourAreaMin', 0)
+    squareRatioMin = sd.getNumber('squareRatioMin', 0)
+    squareRationMax = sd.getNumber('squareRationMax', 0)
+    solidityMin = sd.getNumber('solidityMin', 0)
+    targetHeightMin = sd.getNumber('targetHeightMin', 0)  
     return(contourAreaMin,squareRatioMin,squareRationMax,solidityMin,targetHeightMin)
 ##    contourAreaMin,squareRatioMin, squareRationMax, solidityMin, targetHeightMin
